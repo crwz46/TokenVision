@@ -6,6 +6,12 @@ __pycache__/
 # Charts
 charts/
 
+# Cache
+.cache/
+
+# Environment
+.env
+
 # IDE
 .vscode/
 .idea/
@@ -13,3 +19,9 @@ charts/
 # OS
 .DS_Store
 Thumbs.db
+
+# Python
+*.egg-info/
+dist/
+build/
+

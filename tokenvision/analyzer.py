@@ -121,12 +121,26 @@ class SampleGenerator:
 
 
 class TokenVision:
-    def __init__(self):
+    def __init__(self, use_live: bool = False):
         self.token: Optional[TokenInfo] = None
         self.holders: List[Holder] = []
         self.metrics: Dict = {}
+        self.use_live = use_live
+        self._live_source = False
 
     def analyze(self, symbol: str = "UNI") -> Dict:
+        if self.use_live:
+            from .config import Config
+            from .fetcher import TokenFetcher
+            config = Config()
+            if config.any_api_key():
+                fetcher = TokenFetcher(config)
+                result = fetcher.fetch(symbol)
+                if result:
+                    self.token, self.holders = result
+                    self._live_source = True
+                    self._compute_metrics()
+                    return self._report()
         self.token, self.holders = SampleGenerator.generate(symbol)
         self._compute_metrics()
         return self._report()
@@ -188,12 +202,13 @@ class TokenVision:
         }
 
     @staticmethod
-    def display(report: Dict):
+    def display(report: Dict, live: bool = False):
         t = report["token"]
         m = report["metrics"]
 
+        source = "🔴 LIVE" if live else "🔵 SAMPLE"
         print("=" * 70)
-        print(f"  {m['risk_icon']} TOKENVISION — {t['symbol']}")
+        print(f"  {m['risk_icon']} TOKENVISION — {t['symbol']}  ({source})")
         print("=" * 70)
         print(f"\n  Token       : {t['name']} ({t['symbol']})")
         print(f"  Supply      : {t['total_supply']:,}")

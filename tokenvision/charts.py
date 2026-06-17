@@ -3,9 +3,10 @@ from typing import Dict
 
 
 CHARTS_DIR = "charts"
+EXPORT_FORMATS = ["png", "pdf", "svg"]
 
 
-def generate(report: Dict) -> Dict[str, str]:
+def generate(report: Dict, formats: list = None) -> Dict[str, str]:
     try:
         import matplotlib
         matplotlib.use("Agg")
@@ -17,6 +18,9 @@ def generate(report: Dict) -> Dict[str, str]:
     os.makedirs(CHARTS_DIR, exist_ok=True)
     symbol = report["token"]["symbol"]
     paths = {}
+
+    if formats is None:
+        formats = ["png"]
 
     # Pie chart
     fig, ax = plt.subplots(figsize=(10, 8))
@@ -46,11 +50,12 @@ def generate(report: Dict) -> Dict[str, str]:
     ax.set_title(f"{symbol} Holder Distribution", color="#58a6ff",
                   fontsize=14, fontweight="bold", pad=20)
 
-    p = os.path.join(CHARTS_DIR, f"{symbol}_pie.png")
-    plt.tight_layout()
-    plt.savefig(p, dpi=150, bbox_inches="tight", facecolor="#0d1117")
+    for fmt in formats:
+        p = os.path.join(CHARTS_DIR, f"{symbol}_pie.{fmt}")
+        plt.tight_layout()
+        plt.savefig(p, dpi=150, bbox_inches="tight", facecolor="#0d1117")
+        paths[f"pie_{fmt}"] = p
     plt.close()
-    paths["pie"] = p
 
     # Bar chart
     fig, ax = plt.subplots(figsize=(12, 7))
@@ -80,11 +85,12 @@ def generate(report: Dict) -> Dict[str, str]:
         ax.text(bar.get_width() + 0.3, bar.get_y() + bar.get_height() / 2,
                 f"{pct:.2f}%", va="center", fontsize=8, color="#c9d1d9")
 
-    p = os.path.join(CHARTS_DIR, f"{symbol}_bar.png")
-    plt.tight_layout()
-    plt.savefig(p, dpi=150, bbox_inches="tight", facecolor="#0d1117")
+    for fmt in formats:
+        p = os.path.join(CHARTS_DIR, f"{symbol}_bar.{fmt}")
+        plt.tight_layout()
+        plt.savefig(p, dpi=150, bbox_inches="tight", facecolor="#0d1117")
+        paths[f"bar_{fmt}"] = p
     plt.close()
-    paths["bar"] = p
 
     # Lorenz curve
     fig, ax = plt.subplots(figsize=(8, 8))
@@ -120,11 +126,12 @@ def generate(report: Dict) -> Dict[str, str]:
     ax.tick_params(colors="#8b949e")
     ax.grid(color="#21262d", linewidth=0.5, alpha=0.5)
 
-    p = os.path.join(CHARTS_DIR, f"{symbol}_lorenz.png")
-    plt.tight_layout()
-    plt.savefig(p, dpi=150, bbox_inches="tight", facecolor="#0d1117")
+    for fmt in formats:
+        p = os.path.join(CHARTS_DIR, f"{symbol}_lorenz.{fmt}")
+        plt.tight_layout()
+        plt.savefig(p, dpi=150, bbox_inches="tight", facecolor="#0d1117")
+        paths[f"lorenz_{fmt}"] = p
     plt.close()
-    paths["lorenz"] = p
 
     print(f"\n  Charts saved to {CHARTS_DIR}/")
     return paths
